@@ -7,11 +7,11 @@ echo "Проверяем наличие необходимых пакетов"
 sleep 1
 if ! command -v vim >/dev/null; then
 	echo "vim не установлен. Устанавливаем"
-	opkg install vim -y
+	opkg install vim
 fi
 if ! command -v curl >/dev/null; then
 	echo "curl не установлен. Устанавливаем"
-	opkg install curl -y
+	opkg install curl
 fi
 
 echo "Добавляем ключ авторизации"
@@ -19,6 +19,7 @@ sleep 1
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINf4cPCtk0ShsGuWU7kfGTIXwkstv8xGXVPrMX7wrVB9 u0_a627@localhost" >> /etc/dropbear/authorized_keys || echo "Что-то пошло не так"
 
 echo "Создаём правило перенаправления"
+if ! grep -q "ssh_outside" /etc/config/firewall; then
 cat << EOF >>/etc/config/firewall
 config redirect
 	option dest 'lan'
@@ -33,6 +34,7 @@ config redirect
 	option enabled '1'
 EOF
 sleep 1
+fi
 
 echo "Настраиваем сервер dropbear"
 cat << EOF >/etc/config/dropbear
@@ -52,5 +54,5 @@ echo "Применение изменений"
 /etc/init.d/dropbear restart
 
 echo "Вычисляем по ip"
-local_ip=(curl -s 2ip.io)
-echo "local_ip - Вот это вот скинуть"
+local_ip="$(curl -s 2ip.io)"
+echo "$local_ip - Вот это вот скинуть"
