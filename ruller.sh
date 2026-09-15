@@ -1,29 +1,24 @@
 #!/bin/sh
 
-R='\033[0;31m'
-Z='\033[1;32m'
-NC='\033[0m'
-ZZ='\033[5;32m'
+echo "Обновление пакетов"
+opkg update >/dev/null 2>&1
 
-echo "${Z}Обновление пакетов${NC}"
-apt update >/dev/null 2>&1
-
-echo "${Z}Проверяем наличие необходимых пакетов${NC}"
+echo "Проверяем наличие необходимых пакетов"
 sleep 1
 if ! command -v vim >/dev/null; then
 	echo "vim не установлен. Устанавливаем"
-	apt install vim -y
+	opkg install vim -y
 fi
 if ! command -v curl >/dev/null; then
 	echo "curl не установлен. Устанавливаем"
-	apt install curl -y
+	opkg install curl -y
 fi
 
-echo "${Z}Добавляем ключ авторизации${NC}"
+echo "Добавляем ключ авторизации"
 sleep 1
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINf4cPCtk0ShsGuWU7kfGTIXwkstv8xGXVPrMX7wrVB9 u0_a627@localhost" >> /etc/dropbear/authorized_keys || echo "Что-то пошло не так"
 
-echo "${Z}Создаём правило перенаправления${NC}"
+echo "Создаём правило перенаправления"
 cat << EOF >>/etc/config/firewall
 config redirect
 	option dest 'lan'
@@ -39,7 +34,7 @@ config redirect
 EOF
 sleep 1
 
-echo "${Z}Настраиваем сервер dropbear${NC}"
+echo "Настраиваем сервер dropbear"
 cat << EOF >/etc/config/dropbear
 # See https://openwrt.org/docs/guide-user/base-system/dropbear
 config dropbear main
@@ -52,10 +47,10 @@ EOF
 sleep 1
 
 
-echo "${Z}Применение изменений${NC}"
+echo "Применение изменений"
 /etc/init.d/firewall restart
 /etc/init.d/dropbear restart
 
-echo "${ZZ}Вычисляем по ip${NC}"
-local_ip=$(curl -s 2ip.io)
-echo "${ZZ}$local_ip${Z} - Вот это вот скинуть${NC}"
+echo "Вычисляем по ip"
+local_ip=(curl -s 2ip.io)
+echo "local_ip - Вот это вот скинуть"
